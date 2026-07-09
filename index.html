@@ -516,12 +516,25 @@ settingsEl.addEventListener('click', e => { if (e.target === settingsEl) setting
 function onSndChange() {
   SND.music = swMusic.checked; SND.sfx = swSfx.checked; SND.vol = (+volRange.value) / 100;
   audioInit(); applySndVol(); saveSnd();
-  if (SND.music && introVid.paused && (state === 'start' || state === 'select' || state === 'difficulty'))
-    introVid.play().catch(() => {});
+  if (SND.music && introVid.paused && menuVisible()) introVid.play().catch(() => {});
 }
 swMusic.addEventListener('change', onSndChange);
 swSfx.addEventListener('change', onSndChange);
 volRange.addEventListener('input', onSndChange);
+
+// ---------- Tự TẮT nhạc giao diện khi rời game ----------
+// Sự cố hay gặp trên Mac: sau khi chạm mở khoá, video giao diện cứ phát nhạc dù người
+// dùng đã chuyển tab / bấm ra app khác / thu nhỏ. Ở đây dừng hẳn video (cả hình lẫn tiếng)
+// khi trang bị ẩn hoặc mất tiêu điểm, và chỉ phát lại khi đang xem màn giao diện.
+function menuVisible() { return state === 'start' || state === 'select' || state === 'difficulty'; }
+function refreshVideoPlayback() {
+  if (document.hidden || !menuVisible()) { introVid.pause(); }
+  else if (introVid.paused) { introVid.play().catch(() => {}); }
+}
+document.addEventListener('visibilitychange', refreshVideoPlayback);
+window.addEventListener('blur',    () => introVid.pause());     // bấm ra ngoài trình duyệt -> im
+window.addEventListener('pagehide', () => introVid.pause());    // rời trang -> im
+window.addEventListener('focus',   refreshVideoPlayback);       // quay lại -> phát tiếp nếu còn ở giao diện
 
 // ---------- Va chạm ----------
 function circleRect(cx, cy, r, rx, ry, rw, rh) {
