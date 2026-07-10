@@ -359,13 +359,13 @@ introVid.loop = true; introVid.preload = 'auto';
 introVid.poster = assetURL('intro_poster.webp');   // khung đầu video hiện ngay (không màn đen khi chưa phát)
 introVid.src = assetURL('intro.mp4');
 introVid.load();
-// Điện thoại: autoplay hay bị chặn (mạng chậm / tiết kiệm pin / trình duyệt trong app).
-// Chiến lược: (1) thử lại autoplay TẮT TIẾNG khi video tải đủ dữ liệu;
-// (2) cú chạm của người chơi được phép play() trực tiếp (quyền từ cú chạm — Safari phát inline);
-// (3) nếu máy nào vẫn BUNG trình phát toàn màn hình -> tự thoát NGAY + cấm video vĩnh viễn (vidBanned),
-//     giao diện dùng ảnh tĩnh, không bao giờ bung lại nữa.
-let vidInlineOK = false;   // đã chứng minh phát inline được
-let vidBanned = false;     // máy này bung trình phát riêng -> cạch mặt video
+// ĐIỆN THOẠI: theo yêu cầu — dùng GIAO DIỆN ẢNH TĨNH (poster), chạm là vào game luôn,
+// KHÔNG đụng tới video (autoplay điện thoại không ổn định, từng bung trình phát riêng).
+// MÁY TÍNH: video giao diện + nhạc tự chạy như cũ.
+const IS_PHONE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.userAgent));   // iPad mới khai là Mac
+let vidInlineOK = false;        // đã chứng minh phát inline được
+let vidBanned = IS_PHONE;       // điện thoại: cấm video ngay từ đầu -> luôn là ảnh tĩnh
 introVid.addEventListener('playing', () => { vidInlineOK = true; });
 introVid.addEventListener('webkitbeginfullscreen', () => {
   vidBanned = true; vidInlineOK = false;
