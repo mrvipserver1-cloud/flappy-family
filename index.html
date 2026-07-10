@@ -379,6 +379,20 @@ introVid.addEventListener('webkitbeginfullscreen', () => {
     introVid.play().catch(() => {});
   }
 }));
+// BÁM RIẾT autoplay ~30 giây đầu: điện thoại mạng chậm / chặn lúc đầu nhưng cho phép sau.
+// Video chạy được 1 lần (vidInlineOK) hoặc bị cấm là ngừng thử.
+let vidTries = 0;
+const vidRetry = setInterval(() => {
+  if (vidBanned || vidInlineOK || ++vidTries > 40) { clearInterval(vidRetry); return; }
+  if (menuVisible() && introVid.paused && !document.hidden) {
+    if (!soundUnlocked) introVid.muted = true;
+    introVid.play().catch(() => {});
+  }
+}, 700);
+// Chạm BẤT KỲ lúc đang ở giao diện mà video còn đứng -> kích chạy (touchend = chắc ăn nhất trên iOS cũ)
+window.addEventListener('touchend', () => {
+  if (!vidBanned && menuVisible() && introVid.paused) introVid.play().catch(() => {});
+}, { passive: true });
 let introCounted = false;
 function introDone() { if (!introCounted) { introCounted = true; loaded++; } }
 introVid.addEventListener('loadeddata', introDone);
