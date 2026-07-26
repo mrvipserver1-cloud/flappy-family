@@ -846,7 +846,7 @@ function update(dt) {
   const lastX = pillars.length ? pillars[pillars.length - 1].x : 0;
   if (lastX < W + 60) spawnPillar(lastX + P.spacing);
 
-  // tên lửa lơ lửng: trôi cùng thế giới; đụng = NỔ TUNG + bay theo hướng đầu tên lửa (lên trời)
+  // tên lửa lơ lửng: trôi cùng thế giới; đụng = NỔ TUNG + MẤT 1 TIM (hết tim mới văng lên trời)
   for (let i = rockets.length - 1; i >= 0; i--) {
     const r = rockets[i];
     r.x -= speed * dt; r.t += dt;
@@ -863,9 +863,14 @@ function update(dt) {
         rockets.splice(i, 1);
       } else if (invincible <= 0) {
         rockets.splice(i, 1);
-        launchDir = -1;                              // mũi tên lửa hướng LÊN -> văng lên trời
-        state = 'dying'; setFace('dead', 999); hitFlash = 0.4;
-        sfxDead();
+        if (lives > 0) {                             // còn tim: chỉ MẤT 1 TIM, choáng rồi bay tiếp
+          loseLife();
+          floatText('-1 TIM', bird.x, bird.y - 46 * S, '#ff8f8f');
+        } else {                                     // hết tim: văng lên trời theo mũi tên lửa
+          launchDir = -1;
+          state = 'dying'; setFace('dead', 999); hitFlash = 0.4;
+          sfxDead();
+        }
       }
     }
   }
